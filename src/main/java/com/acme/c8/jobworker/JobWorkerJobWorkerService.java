@@ -2,14 +2,17 @@ package com.acme.c8.jobworker;
 import java.util.*;
 
 import com.acme.c8.jobworker.util.DmnAndFeelEvaluator;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
-@Component
+@Service
 @Slf4j
+@Validated
 public class JobWorkerJobWorkerService {
 
-    public Map<String, Object> findUserImpl(  String userId) {
+    public Map<String, Object> findUser(@NotBlank(message = "User ID cannot be blank") final String userId) {
         Map<String, Object> outputs = new HashMap<>();
         Boolean tmp = DmnAndFeelEvaluator.evaluateUserIsFound(userId);
         outputs.put("isFound", tmp);

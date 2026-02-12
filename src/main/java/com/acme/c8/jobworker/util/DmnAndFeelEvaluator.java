@@ -1,10 +1,11 @@
 package com.acme.c8.jobworker.util;
 
-
-
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.dmn.engine.DmnDecision;
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnEngine;
+import org.camunda.bpm.dmn.engine.DmnEngineException;
 import org.camunda.bpm.dmn.engine.impl.DefaultDmnEngineConfiguration;
 import org.camunda.bpm.dmn.feel.impl.FeelEngine;
 import org.camunda.bpm.engine.variable.VariableMap;
@@ -14,6 +15,7 @@ import org.camunda.bpm.engine.variable.context.VariableContext;
 import java.io.InputStream;
 import java.util.Map;
 
+@Slf4j
 public class DmnAndFeelEvaluator {
 
 
@@ -30,28 +32,35 @@ public class DmnAndFeelEvaluator {
        DMN
        ------------------------- */
 
-    public static boolean evaluateUserIsFound(String userId) {
-
-        InputStream dmnStream = DmnAndFeelEvaluator.class
-                .getClassLoader()
-                .getResourceAsStream("UserIsFound.dmn");
-
-        if (dmnStream == null) {
-            throw new IllegalStateException("UserIsFound.dmn not found on classpath");
+    public static boolean evaluateUserIsFound(final String userId) {
+        if (StringUtils.isBlank(userId)) {
+            throw new IllegalArgumentException("userId must not be blank");
         }
+        try {
+            InputStream dmnStream = DmnAndFeelEvaluator.class
+                    .getClassLoader()
+                    .getResourceAsStream("UserIsFound.dmn");
 
-        DmnDecision decision =
-                DMN_ENGINE.parseDecision("UserIsFoundRule", dmnStream);
+            if (dmnStream == null) {
+                throw new IllegalStateException("UserIsFound.dmn not found on classpath");
+            }
 
-        VariableMap variables = Variables.createVariables()
-                .putValue("userId", userId);
+            DmnDecision decision =
+                    DMN_ENGINE.parseDecision("UserIsFoundRule", dmnStream);
 
-        DmnDecisionResult result =
-                DMN_ENGINE.evaluateDecision(decision, variables);
+            VariableMap variables = Variables.createVariables()
+                    .putValue("userId", userId);
 
-        return result
-                .getSingleResult()
-                .getEntry("isFound");
+            DmnDecisionResult result =
+                    DMN_ENGINE.evaluateDecision(decision, variables);
+
+            return result
+                    .getSingleResult()
+                    .getEntry("isFound");
+        } catch (DmnEngineException e) {
+            log.error("Error evaluating DMN decision for userId: {}", userId, e);
+            return false;
+        }
     }
 
     /* -------------------------
