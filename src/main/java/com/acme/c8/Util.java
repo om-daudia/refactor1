@@ -47,7 +47,7 @@ public class Util {
             boolean boolValue = Boolean.parseBoolean(String.valueOf(m.get(key)));
             return String.valueOf(boolValue);
         } catch (Exception e) {
-            log.error("asdkajsdoias ", e);
+            log.error("Can't parse the value to boolean!", e);
             return null;
         }
     }
