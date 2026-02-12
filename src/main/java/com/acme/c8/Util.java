@@ -1,19 +1,19 @@
 package com.acme.c8;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import lombok.extern.slf4j.Slf4j;
 import org.camunda.feel.api.FeelEngineApi;
 import org.camunda.feel.api.FeelEngineBuilder;
-import org.camunda.feel.api.SuccessfulEvaluationResult;
 
-import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class Util {
     public static void setMapValue(Map<String, Object> map, Object key, Object value) {
         if (map == null || key == null || value == null) return;
@@ -24,13 +24,14 @@ public class Util {
         map.put(k, v);
     }
 
-    public static void setMapValueAsObject(Map<String, Object> map, Object key, Object value) {
-        if (map == null || key == null || value == null) return;
-
+    public static Map<String, Object> setMapValueAsObject(Map<String, Object> map, Object key, Object value) {
+        if (map == null || key == null || value == null) return Collections.emptyMap();
+        Map<String, Object> map1 = new HashMap<>(map);
         String k = key.toString();
         Object v = value;
 
-        map.put(k, v);
+        map1.put(k, v);
+        return map1;
     }
     public static String toPrettyJson(HashMap<String, Object> variables) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -39,28 +40,16 @@ public class Util {
         return prettyJson;
     }
     public static String parseBoolean(Map<String, Object> m, String key) {
-        String retval = "false";
         try {
             if (m == null || key == null) {
-                return retval;
+                return Boolean.FALSE.toString();
             }
-
-            Object o = m.get(key);
-            if (o != null) {
-                if (o instanceof Boolean) {
-                    retval = o.toString();
-                } else {
-                    String s = o.toString();
-                    if (s.equalsIgnoreCase("true")) {
-                        retval = "true";
-                    }
-                }
-            }
-
+            boolean boolValue = Boolean.parseBoolean(String.valueOf(m.get(key)));
+            return String.valueOf(boolValue);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("asdkajsdoias ", e);
+            return null;
         }
-        return retval;
     }
     public static String getStringValue(Map<String,Object> m, String key) {
         Object o=m.get(key);
