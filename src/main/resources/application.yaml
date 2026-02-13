@@ -8,6 +8,10 @@ spring:
 server:
   port: 8080
 
+patient:
+  api:
+    base-url: ${PATIENT_API_BASE_URL:https://api.capbpm.com}
+
 camunda:
   client:
     mode: saas
