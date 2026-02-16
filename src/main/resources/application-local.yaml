@@ -1,7 +1,17 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+
 camunda:
   client:
+    mode: saas
     auth:
       client-id: lsiLtfKAT.RBOBETuD3DWmuyFmxjMP4Vj
       client-secret: L7uDYJ9SZDmMD0_Etvayn0DDt1nGuCvKsbkIdRMdjH_3QOE.c_14Swajocc~-Yhn-
-    cluster-id: 35d52cdf-7b23-4ba2-ad4d-ede62598483b
-    region: jfk-1
+    cloud:
+      cluster-id: 35d52cdf-7b23-4ba2-ad4d-ede62598483b
+      region: jfk-1
+    worker:
+      defaults:
+        stream-enabled: true
