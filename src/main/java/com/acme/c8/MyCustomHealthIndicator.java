@@ -4,6 +4,7 @@ import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
 import org.springframework.stereotype.Component;
 
+
 @Component
 public class MyCustomHealthIndicator implements HealthIndicator {
 

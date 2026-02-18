@@ -3,6 +3,7 @@ package com.acme.c8.jobworker;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -31,10 +32,12 @@ public class PatientClient {
         return MAPPER.convertValue(contentNode, new TypeReference<List<Map<String, Object>>>() {});
     }
 
+    // Helper: build URL with query parameters
     private static String buildUrl(int page, int size) {
         return String.format("%s?page=%d&size=%d", BASE_URL, page, size);
     }
 
+    // Helper: send GET request
     private static HttpResponse<String> sendGetRequest(String url) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -59,5 +62,12 @@ public class PatientClient {
         return contentNode;
     }
 
-
+    // Example usage
+    public static void main(String[] args) throws Exception {
+        List<Map<String, Object>> patients = loadPatients(0, 25);
+        System.out.println("Loaded patients: " + patients.size());
+        if (!patients.isEmpty()) {
+            System.out.println("First patient riskLevel: " + patients.get(0).get("riskLevel"));
+        }
+    }
 }
