@@ -1,4 +1,4 @@
-package com.acme.c8.jobworker.util;
+package com.acme.c8.shared.dmn;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.camunda.bpm.dmn.engine.DmnDecision;

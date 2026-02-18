@@ -1,4 +1,4 @@
-package com.acme.c8;
+package com.acme.c8.shared.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;

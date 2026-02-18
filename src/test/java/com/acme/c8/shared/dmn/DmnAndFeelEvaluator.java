@@ -30,47 +30,9 @@ public class DmnAndFeelEvaluator {
        DMN
        ------------------------- */
 
-    public static boolean evaluateUserIsFound(String userId) {
-
-        InputStream dmnStream = DmnAndFeelEvaluator.class
-                .getClassLoader()
-                .getResourceAsStream("UserIsFound.dmn");
-
-        if (dmnStream == null) {
-            throw new IllegalStateException("UserIsFound.dmn not found on classpath");
-        }
-
-        DmnDecision decision =
-                DMN_ENGINE.parseDecision("UserIsFoundRule", dmnStream);
-
-        VariableMap variables = Variables.createVariables()
-                .putValue("userId", userId);
-
-        DmnDecisionResult result =
-                DMN_ENGINE.evaluateDecision(decision, variables);
-
-        return result
-                .getSingleResult()
-                .getEntry("isFound");
-    }
-
-    /* -------------------------
-       FEEL (ARBITRARY EXPRESSIONS)
-       ------------------------- */
-
-    public static Object evaluateFeel(
-            String expression,
-            Map<String, Object> variables) {
-
-      //  org.camunda.feel.context.Context context = org.camunda.feel.context.Contex of(variables);
-      //  VariableContext context = VariableContext.fromMap(variables);
+ 
 
 
-        VariableContext context=null;
-        return FEEL_ENGINE.evaluateSimpleExpression(expression, context);
-     //   return FEEL_ENGINE.evaluateSimpleExpression(expression, variables);
-
-    }
 
     /* -------------------------
        DEMO
