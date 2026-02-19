@@ -1,8 +1,9 @@
-package com.acme.c8.jobworker;
+package com.acme.c8.patient;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -11,6 +12,7 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class PatientClient {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -20,7 +22,7 @@ public class PatientClient {
      * Calls the patients API and returns the "content" array
      * as a List<Map<String, Object>>.
      */
-    public static List<Map<String, Object>> loadPatients(int page, int size) throws Exception {
+    public List<Map<String, Object>> loadPatients(int page, int size) throws Exception {
 
         String url = String.format(
                 "https://api.capbpm.com/api/patients/load?page=%d&size=%d",

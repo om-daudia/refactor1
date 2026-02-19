@@ -1,13 +1,15 @@
-package com.acme.c8.jobworker;
-import java.util.*;
+package com.acme.c8.user;
 
-import com.acme.c8.jobworker.util.DmnAndFeelEvaluator;
+import com.acme.c8.evaluator.DmnAndFeelEvaluator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
 @Slf4j
-public class JobWorkerJobWorkerService {
+public class UserService {
 
     public Map<String, Object> findUserImpl(  String userId) {
         Map<String, Object> outputs = new HashMap<>();

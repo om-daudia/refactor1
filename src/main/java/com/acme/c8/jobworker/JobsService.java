@@ -1,11 +1,12 @@
 package com.acme.c8.jobworker;
 
-import com.acme.c8.jobworker.util.DmnEvaluator;
+import com.acme.c8.evaluator.DmnEvaluator;
+import com.acme.c8.user.UserService;
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.annotation.Variable;
 import io.camunda.client.exception.BpmnError;
 import io.camunda.zeebe.client.api.response.ActivatedJob;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -14,10 +15,12 @@ import java.util.Map;
 
 @Slf4j
 @Component
-@AllArgsConstructor
-public class JobWorkerJobWorker {
+@RequiredArgsConstructor
+public class JobsService {
 
-    private final JobWorkerJobWorkerService service;
+    private final UserService userService;
+
+    private final DmnEvaluator dmnEvaluator;
 
     @JobWorker(type = "com.capbpm.c8.JobWorker.FindUser:v.1.1", fetchVariables = {"userId"})
     public Map<String, Object> findUser(final ActivatedJob job, @Variable String userId) {
@@ -26,7 +29,7 @@ public class JobWorkerJobWorker {
         log.trace(METHOD_NAME + " started...");
 
         try {
-            Map<String, Object> outputs = service.findUserImpl(userId);
+            Map<String, Object> outputs = userService.findUserImpl(userId);
 
             log.trace(METHOD_NAME + " Finished.");
             return outputs;
@@ -43,7 +46,7 @@ public class JobWorkerJobWorker {
         log.trace(METHOD_NAME + " started...");
 
         try {
-            long duration = DmnEvaluator.go(index);
+            long duration = dmnEvaluator.go(index);
 
             Map<String, Object> outputs = new HashMap<>();
             outputs.put("duration", duration);

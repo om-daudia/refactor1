@@ -1,21 +1,30 @@
-package com.acme.c8.jobworker.util;
+package com.acme.c8.evaluator;
 
+import com.acme.c8.patient.PatientClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.camunda.bpm.dmn.engine.DmnDecision;
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.impl.DefaultDmnEngineConfiguration;
 import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.engine.variable.Variables;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.acme.c8.jobworker.PatientClient.loadPatients;
 
+@Component
+@RequiredArgsConstructor
 public class DmnEvaluator {
+
+    private final PatientClient patientClient;
 
     private static final DefaultDmnEngineConfiguration CONFIG =
             (DefaultDmnEngineConfiguration)
@@ -34,43 +43,9 @@ public class DmnEvaluator {
     private static final Map<String, DmnDecision> DECISION_CACHE =
             new ConcurrentHashMap<>();
 
-    /**
-     * Evaluate a DMN decision and return the result as JSON.
-     */
-    public static String evaluateToJson(
-            String dmnFile,
-            String decisionId,
-            Map<String, Object> inputVariables) {
-
-        DmnDecision decision = getOrLoadDecision(dmnFile, decisionId);
-
-        VariableMap variables = Variables.createVariables();
-        inputVariables.forEach(variables::putValue);
-
-        DmnDecisionResult result =
-                DMN_ENGINE.evaluateDecision(decision, variables);
-
-        return toJson(result);
-    }
-
-    public static String evaluateToJsonForList(
-            String dmnFile,
-            String decisionId,
-            List<Map<String, Object>> pList) {
-
-        List<DmnDecisionResult> resList = new ArrayList<DmnDecisionResult>();
-        DmnDecision decision = getOrLoadDecision(dmnFile, decisionId);
-
-        VariableMap variables = Variables.createVariables();
-        for (Map<String, Object> inputVariables : pList) {
-            inputVariables.forEach(variables::putValue);
-
-            DmnDecisionResult result =
-                    DMN_ENGINE.evaluateDecision(decision, variables);
-
-            resList.add(result);
-        }
-        return toJsonFromList(resList);
+    public static void main(String[] args) throws Exception {
+        DmnEvaluator dmnEvaluator = new DmnEvaluator(new PatientClient());
+        dmnEvaluator.go(0);
     }
 
 
@@ -97,21 +72,6 @@ public class DmnEvaluator {
 
             return DMN_ENGINE.parseDecision(decisionId, dmnStream);
         });
-    }
-
-    /**
-     * Convert a DMN decision result into JSON.
-     */
-    private static String toJson(DmnDecisionResult result) {
-        try {
-            return OBJECT_MAPPER.writeValueAsString(
-                    result.getResultList()
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Failed to serialize DMN result to JSON", e
-            );
-        }
     }
 
     private static String toJsonFromList(List<DmnDecisionResult> results) {
@@ -205,13 +165,9 @@ public class DmnEvaluator {
         return patient;
     }
 
-    public static void main(String[] args) throws Exception {
+    public long go(int pageIndex) throws Exception {
 
-        go(0);
-    }
-    public static long go(int pageIndex) throws Exception {
-
-        List<Map<String, Object>>patientList  = loadPatients(pageIndex,1000);
+        List<Map<String, Object>> patientList = patientClient.loadPatients(pageIndex, 1000);
         int size = patientList.size();
         System.out.println("Loaded patients: " + size);
         String patientRuleFile = "PatientRule.dmn";
@@ -228,5 +184,25 @@ public class DmnEvaluator {
     //    System.out.println(ruleResult);
 
         return duration;
+    }
+
+    public static String evaluateToJsonForList(
+            String dmnFile,
+            String decisionId,
+            List<Map<String, Object>> pList) {
+
+        List<DmnDecisionResult> resList = new ArrayList<>();
+        DmnDecision decision = getOrLoadDecision(dmnFile, decisionId);
+
+        VariableMap variables = Variables.createVariables();
+        for (Map<String, Object> inputVariables : pList) {
+            inputVariables.forEach(variables::putValue);
+
+            DmnDecisionResult result =
+                    DMN_ENGINE.evaluateDecision(decision, variables);
+
+            resList.add(result);
+        }
+        return toJsonFromList(resList);
     }
 }
