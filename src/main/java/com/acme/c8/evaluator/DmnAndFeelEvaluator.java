@@ -10,10 +10,12 @@ import org.camunda.bpm.dmn.feel.impl.FeelEngine;
 import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.engine.variable.Variables;
 import org.camunda.bpm.engine.variable.context.VariableContext;
+import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.Map;
 
+@Component
 public class DmnAndFeelEvaluator {
 
 
@@ -30,28 +32,31 @@ public class DmnAndFeelEvaluator {
        DMN
        ------------------------- */
 
-    public static boolean evaluateUserIsFound(String userId) {
+    public static void main(String[] args) {
 
-        InputStream dmnStream = DmnAndFeelEvaluator.class
-                .getClassLoader()
-                .getResourceAsStream("UserIsFound.dmn");
+        DmnAndFeelEvaluator dmnAndFeelEvaluator = new DmnAndFeelEvaluator();
+        System.out.println("DMN: " + dmnAndFeelEvaluator.evaluateUserIsFound("007"));
 
-        if (dmnStream == null) {
-            throw new IllegalStateException("UserIsFound.dmn not found on classpath");
-        }
+        System.out.println("FEEL 1: " +
+                evaluateFeel(
+                        "userId = \"007\"",
+                        Map.of("userId", "007")
+                )
+        );
 
-        DmnDecision decision =
-                DMN_ENGINE.parseDecision("UserIsFoundRule", dmnStream);
-
-        VariableMap variables = Variables.createVariables()
-                .putValue("userId", userId);
-
-        DmnDecisionResult result =
-                DMN_ENGINE.evaluateDecision(decision, variables);
-
-        return result
-                .getSingleResult()
-                .getEntry("isFound");
+//        System.out.println("FEEL 2: " +
+//                evaluateFeel(
+//                        "if score >= 90 then \"A\" else \"B\"",
+//                        Map.of("score", 95)
+//                )
+//        );
+//
+//        System.out.println("FEEL 3: " +
+//                evaluateFeel(
+//                        "sum(items)",
+//                        Map.of("items", java.util.List.of(10, 20, 30))
+//                )
+//        );
     }
 
     /* -------------------------
@@ -76,29 +81,27 @@ public class DmnAndFeelEvaluator {
        DEMO
        ------------------------- */
 
-    public static void main(String[] args) {
+    public boolean evaluateUserIsFound(String userId) {
 
-        System.out.println("DMN: " + evaluateUserIsFound("007"));
+        InputStream dmnStream = DmnAndFeelEvaluator.class
+                .getClassLoader()
+                .getResourceAsStream("UserIsFound.dmn");
 
-        System.out.println("FEEL 1: " +
-                evaluateFeel(
-                        "userId = \"007\"",
-                        Map.of("userId", "007")
-                )
-        );
+        if (dmnStream == null) {
+            throw new IllegalStateException("UserIsFound.dmn not found on classpath");
+        }
 
-//        System.out.println("FEEL 2: " +
-//                evaluateFeel(
-//                        "if score >= 90 then \"A\" else \"B\"",
-//                        Map.of("score", 95)
-//                )
-//        );
-//
-//        System.out.println("FEEL 3: " +
-//                evaluateFeel(
-//                        "sum(items)",
-//                        Map.of("items", java.util.List.of(10, 20, 30))
-//                )
-//        );
+        DmnDecision decision =
+                DMN_ENGINE.parseDecision("UserIsFoundRule", dmnStream);
+
+        VariableMap variables = Variables.createVariables()
+                .putValue("userId", userId);
+
+        DmnDecisionResult result =
+                DMN_ENGINE.evaluateDecision(decision, variables);
+
+        return result
+                .getSingleResult()
+                .getEntry("isFound");
     }
 }
