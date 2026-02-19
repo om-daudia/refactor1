@@ -15,8 +15,8 @@
   <description>Project for Camunda8 platform</description>
   <properties>
     <java.version>21</java.version>
-    <spring-cloud.version>2023.0.0</spring-cloud.version>
-    <spring-zeebe.version>8.6.4</spring-zeebe.version>
+    <spring-cloud.version>2025.1.1</spring-cloud.version>
+    <camuda.version>8.8.9</camuda.version>
   </properties>
   <dependencies>
     <dependency>
@@ -28,7 +28,6 @@
           <artifactId>camunda-engine-dmn</artifactId>
           <version>7.24.0</version>
       </dependency>
-
       <dependency>
           <groupId>org.camunda.bpm.dmn</groupId>
           <artifactId>camunda-engine-feel-juel</artifactId>
@@ -45,7 +44,6 @@
     <dependency>
       <groupId>io.camunda</groupId>
       <artifactId>camunda-spring-boot-starter</artifactId>
-      <version>8.8.9</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -66,6 +64,11 @@
         <version>${spring-cloud.version}</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.camunda</groupId>
+        <artifactId>camunda-spring-boot-starter</artifactId>
+        <version>${camuda.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
