@@ -8,14 +8,19 @@ import org.camunda.bpm.dmn.engine.impl.DefaultDmnEngineConfiguration;
 import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.engine.variable.Variables;
 
+import com.acme.c8.jobworker.PatientClient;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.io.InputStream;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.acme.c8.jobworker.PatientClient.loadPatients;
-
+@Component
+@AllArgsConstructor
 public class DmnEvaluator {
+
+    private final PatientClient patientClient;
 
     private static final DefaultDmnEngineConfiguration CONFIG =
             (DefaultDmnEngineConfiguration)
@@ -73,7 +78,6 @@ public class DmnEvaluator {
         return toJsonFromList(resList);
     }
 
-
     /**
      * Load and cache a DMN decision if not already cached.
      */
@@ -128,105 +132,11 @@ public class DmnEvaluator {
         }
     }
 
-
-
-
-
-
-    /* -------------------------
-       DEMO
-       ------------------------- */
-
-    public static Map<String,Object >  getSampplePatnet()
-    {
-        Map<String, Object> patient = new HashMap<>();
-
-        patient.put("id", 1L);
-        patient.put("memberId", "M-1108257d01d14a11946f1a102ef22a91");
-        patient.put("firstName", "Charlotte");
-        patient.put("lastName", "Brown");
-        patient.put("dateOfBirth", LocalDate.parse("1976-07-10"));
-        patient.put("gender", "Non-binary");
-        patient.put("address", "9552 Oak St");
-        patient.put("city", "Boston");
-        patient.put("state", "MA");
-        patient.put("zipCode", "87785");
-
-        patient.put("bmi", 37.9);
-        patient.put("glucoseLevel", 146.7);
-        patient.put("cholesterolLevel", 202.5);
-
-        patient.put("hasDiabetes", true);
-        patient.put("hasHypertension", true);
-        patient.put("hasCopd", false);
-
-        patient.put("erVisitsLast12Months", 6);
-        patient.put("medicationAdherent", true);
-
-        patient.put("metabolicSyndromeRisk", true);
-        patient.put("highReadmissionRisk", true);
-        patient.put("medicationNonAdherenceRisk", false);
-        patient.put("riskLevel", "High");
-
-        return patient;
-    }
-
-    public static Map<String,Object >  getSampplePatnetLow()
-    {
-        Map<String, Object> patient = new HashMap<>();
-
-        patient.put("id", 1L);
-        patient.put("memberId", "M-1108257d01d14a11946f1a102ef22a91");
-        patient.put("firstName", "Charlotte");
-        patient.put("lastName", "Brown");
-        patient.put("dateOfBirth", LocalDate.parse("1976-07-10"));
-        patient.put("gender", "Non-binary");
-        patient.put("address", "9552 Oak St");
-        patient.put("city", "Boston");
-        patient.put("state", "MA");
-        patient.put("zipCode", "87785");
-
-        patient.put("bmi", 20);
-        patient.put("glucoseLevel", 100);
-        patient.put("cholesterolLevel", 202.5);
-
-        patient.put("hasDiabetes", false);
-        patient.put("hasHypertension", false);
-        patient.put("hasCopd", false);
-
-        patient.put("erVisitsLast12Months", 0);
-        patient.put("medicationAdherent", true);
-
-        patient.put("metabolicSyndromeRisk", true);
-        patient.put("highReadmissionRisk", true);
-     //   patient.put("medicationNonAdherenceRisk", false);
-    //    patient.put("riskLevel", "High");
-
-        return patient;
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        go(0);
-    }
-    public static long go(int pageIndex) throws Exception {
-
-        List<Map<String, Object>>patientList  = loadPatients(pageIndex,1000);
-        int size = patientList.size();
-        System.out.println("Loaded patients: " + size);
-        String patientRuleFile = "PatientRule.dmn";
-        String did = "DeterminePatientRiskLevel";
-
-
+    public long go(int pageIndex) throws Exception {
+        List<Map<String, Object>> patientList = patientClient.loadPatients(pageIndex, 1000);
         long start = System.currentTimeMillis();
-        String ruleResult = evaluateToJsonForList(patientRuleFile,did,patientList);
+        evaluateToJsonForList("PatientRule.dmn", "DeterminePatientRiskLevel", patientList);
         long end = System.currentTimeMillis();
-
-        long duration = (end - start) / 1000;
-
-      //  System.out.println("Time taken to evaluate in seconds: " + duration);
-    //    System.out.println(ruleResult);
-
-        return duration;
+        return (end - start) / 1000;
     }
 }
