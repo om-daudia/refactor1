@@ -1,4 +1,4 @@
-package com.acme.c8;
+package com.acme.c8.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
@@ -8,13 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class UtilTest {
+class AppUtilsTest {
 
     @Test
     void evaluateFeel() throws JsonProcessingException {
-
         Map<String, Object> variables = new HashMap<>();
         List<Map<String, Object>> customerList = new ArrayList<>();
         customerList.add(createCustomer("first1", "last1", 8));
@@ -24,10 +23,9 @@ class UtilTest {
         customerList.add(createCustomer("first5", "last5", 45));
         variables.put("customers", customerList);
 
-        var result = Util.evaluateFeel("customers[age>10]", variables);
+        var result = AppUtils.evaluateFeel("customers[age>10]", variables);
 
         assertNotNull(result);
-        System.out.println(result);
     }
 
     private Map<String, Object> createCustomer(String first, String last, int age) {

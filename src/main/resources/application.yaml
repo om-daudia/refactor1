@@ -1,16 +1,15 @@
 spring:
   application:
-    name: my-jobworker
+    name: ${APP_NAME:my-jobworker}
   config:
-    import: optional:configserver:${CONFIG_SERVER_URL}
-# cloud.config.enabled: false
+    import: optional:configserver:${CONFIG_SERVER_URL:}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 camunda:
   client:
-    mode: saas
+    mode: ${CAMUNDA_MODE:saas}
     auth:
       client-id: ${CAMUNDA_CLIENT_ID}
       client-secret: ${CAMUNDA_CLIENT_SECRET}
@@ -19,6 +18,10 @@ camunda:
     zeebe:
       defaults:
         stream-enabled: true
+
+patients:
+  api:
+    base-url: ${PATIENTS_API_BASE_URL:https://api.capbpm.com}
 
 management:
   endpoints:
@@ -40,7 +43,6 @@ management:
       simple:
         enabled: true
 
-# Custom Info for Actuator /info endpoint
 info:
   app:
     name: My Job Worker
