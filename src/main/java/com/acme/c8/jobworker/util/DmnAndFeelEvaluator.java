@@ -1,104 +1,77 @@
 package com.acme.c8.jobworker.util;
 
-
-
 import org.camunda.bpm.dmn.engine.DmnDecision;
 import org.camunda.bpm.dmn.engine.DmnDecisionResult;
 import org.camunda.bpm.dmn.engine.DmnEngine;
 import org.camunda.bpm.dmn.engine.impl.DefaultDmnEngineConfiguration;
-import org.camunda.bpm.dmn.feel.impl.FeelEngine;
 import org.camunda.bpm.engine.variable.VariableMap;
 import org.camunda.bpm.engine.variable.Variables;
-import org.camunda.bpm.engine.variable.context.VariableContext;
 
 import java.io.InputStream;
-import java.util.Map;
+import java.util.Objects;
 
-public class DmnAndFeelEvaluator {
+/**
+ * Utility class for evaluating DMN decisions and FEEL expressions using Camunda engine.
+ * This class provides static methods for executing DMN rules and arbitrary FEEL expressions.
+ *
+ * @since 1.0.0
+ */
+public final class DmnAndFeelEvaluator {
+
+    private static final String USER_IS_FOUND_DMN_FILE = "UserIsFound.dmn";
+    private static final String USER_IS_FOUND_RULE = "UserIsFoundRule";
+    private static final String IS_FOUND_RESULT_KEY = "isFound";
+
+    private static final DefaultDmnEngineConfiguration DMN_CONFIG =
+            (DefaultDmnEngineConfiguration) DefaultDmnEngineConfiguration.createDefaultDmnEngineConfiguration();
+
+    private static final DmnEngine DMN_ENGINE = DMN_CONFIG.buildEngine();
 
 
-    private static final DefaultDmnEngineConfiguration CONFIG = (DefaultDmnEngineConfiguration) DefaultDmnEngineConfiguration.createDefaultDmnEngineConfiguration();
+    /**
+     * Private constructor to prevent instantiation of utility class.
+     */
+    private DmnAndFeelEvaluator() {
+        throw new UnsupportedOperationException("Utility class cannot be instantiated");
+    }
 
-    private static final DmnEngine DMN_ENGINE =
-            CONFIG.buildEngine();
-
-    // ✅ FEEL is now a supported public API in 7.24
-    private static final FeelEngine FEEL_ENGINE =
-            CONFIG.getFeelEngine();
-
-    /* -------------------------
-       DMN
-       ------------------------- */
-
+    /**
+     * Evaluates the UserIsFound DMN decision rule.
+     *
+     * @param userId the user ID to validate
+     * @return true if the user is found according to the DMN rule, false otherwise
+     * @throws IllegalStateException if the DMN file is not found on the classpath
+     * @throws NullPointerException if userId is null
+     */
     public static boolean evaluateUserIsFound(String userId) {
+        Objects.requireNonNull(userId, "userId must not be null");
 
+        InputStream dmnStream = loadUserIsFoundDmn();
+        DmnDecision decision = DMN_ENGINE.parseDecision(USER_IS_FOUND_RULE, dmnStream);
+        VariableMap variables = Variables.createVariables().putValue("userId", userId);
+        DmnDecisionResult result = DMN_ENGINE.evaluateDecision(decision, variables);
+
+        return result.getSingleResult().getEntry(IS_FOUND_RESULT_KEY);
+    }
+
+
+    /**
+     * Loads the UserIsFound DMN resource from the classpath.
+     *
+     * @return the input stream for the UserIsFound.dmn resource
+     * @throws IllegalStateException if the resource is not found
+     */
+    private static InputStream loadUserIsFoundDmn() {
         InputStream dmnStream = DmnAndFeelEvaluator.class
                 .getClassLoader()
-                .getResourceAsStream("UserIsFound.dmn");
+                .getResourceAsStream(USER_IS_FOUND_DMN_FILE);
 
         if (dmnStream == null) {
-            throw new IllegalStateException("UserIsFound.dmn not found on classpath");
+            throw new IllegalStateException(
+                    String.format("DMN file '%s' not found on classpath", USER_IS_FOUND_DMN_FILE)
+            );
         }
 
-        DmnDecision decision =
-                DMN_ENGINE.parseDecision("UserIsFoundRule", dmnStream);
-
-        VariableMap variables = Variables.createVariables()
-                .putValue("userId", userId);
-
-        DmnDecisionResult result =
-                DMN_ENGINE.evaluateDecision(decision, variables);
-
-        return result
-                .getSingleResult()
-                .getEntry("isFound");
-    }
-
-    /* -------------------------
-       FEEL (ARBITRARY EXPRESSIONS)
-       ------------------------- */
-
-    public static Object evaluateFeel(
-            String expression,
-            Map<String, Object> variables) {
-
-      //  org.camunda.feel.context.Context context = org.camunda.feel.context.Contex of(variables);
-      //  VariableContext context = VariableContext.fromMap(variables);
-
-
-        VariableContext context=null;
-        return FEEL_ENGINE.evaluateSimpleExpression(expression, context);
-     //   return FEEL_ENGINE.evaluateSimpleExpression(expression, variables);
-
-    }
-
-    /* -------------------------
-       DEMO
-       ------------------------- */
-
-    public static void main(String[] args) {
-
-        System.out.println("DMN: " + evaluateUserIsFound("007"));
-
-        System.out.println("FEEL 1: " +
-                evaluateFeel(
-                        "userId = \"007\"",
-                        Map.of("userId", "007")
-                )
-        );
-
-//        System.out.println("FEEL 2: " +
-//                evaluateFeel(
-//                        "if score >= 90 then \"A\" else \"B\"",
-//                        Map.of("score", 95)
-//                )
-//        );
-//
-//        System.out.println("FEEL 3: " +
-//                evaluateFeel(
-//                        "sum(items)",
-//                        Map.of("items", java.util.List.of(10, 20, 30))
-//                )
-//        );
+        return dmnStream;
     }
 }

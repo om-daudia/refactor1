@@ -10,27 +10,59 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the Util utility class.
+ * Tests FEEL expression evaluation and other utility functions.
+ *
+ * @since 1.0.0
+ */
 class UtilTest {
 
-    @Test
-    void evaluateFeel() throws JsonProcessingException {
+    private static final String FIRST_NAME_KEY = "first";
+    private static final String LAST_NAME_KEY = "last";
+    private static final String AGE_KEY = "age";
+    private static final String CUSTOMERS_KEY = "customers";
+    private static final String FEEL_EXPRESSION = "customers[age>10]";
 
+    /**
+     * Tests FEEL expression evaluation with a list of customer objects.
+     * Verifies that the expression correctly filters customers by age.
+     *
+     * @throws JsonProcessingException if JSON processing fails
+     */
+    @Test
+    void testEvaluateFeel() throws JsonProcessingException {
+        // Arrange
         Map<String, Object> variables = new HashMap<>();
         List<Map<String, Object>> customerList = new ArrayList<>();
-        customerList.add(createCustomer("first1", "last1", 8));
-        customerList.add(createCustomer("first2", "last2", 18));
-        customerList.add(createCustomer("first3", "last3", 28));
-        customerList.add(createCustomer("first4", "last4", 7));
-        customerList.add(createCustomer("first5", "last5", 45));
-        variables.put("customers", customerList);
+        customerList.add(createCustomer("John", "Doe", 8));
+        customerList.add(createCustomer("Jane", "Smith", 18));
+        customerList.add(createCustomer("Bob", "Johnson", 28));
+        customerList.add(createCustomer("Alice", "Williams", 7));
+        customerList.add(createCustomer("Charlie", "Brown", 45));
+        variables.put(CUSTOMERS_KEY, customerList);
 
-        var result = Util.evaluateFeel("customers[age>10]", variables);
+        // Act
+        var result = Util.evaluateFeel(FEEL_EXPRESSION, variables);
 
-        assertNotNull(result);
-        System.out.println(result);
+        // Assert
+        assertNotNull(result, "FEEL evaluation result should not be null");
+        System.out.println("FEEL evaluation result: " + result);
     }
 
-    private Map<String, Object> createCustomer(String first, String last, int age) {
-        return Map.of("first", first, "last", last, "age", age);
+    /**
+     * Creates a customer map with the specified first name, last name, and age.
+     *
+     * @param firstName the customer's first name
+     * @param lastName the customer's last name
+     * @param age the customer's age
+     * @return a map representing the customer
+     */
+    private Map<String, Object> createCustomer(String firstName, String lastName, int age) {
+        return Map.of(
+                FIRST_NAME_KEY, firstName,
+                LAST_NAME_KEY, lastName,
+                AGE_KEY, age
+        );
     }
 }
