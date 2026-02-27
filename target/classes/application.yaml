@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: my-jobworker
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL}
+# cloud.config.enabled: false
+
+server:
+  port: 8080
+
+camunda:
+  client:
+    mode: saas
+    auth:
+      client-id: ${CAMUNDA_CLIENT_ID}
+      client-secret: ${CAMUNDA_CLIENT_SECRET}
+    cluster-id: ${CAMUNDA_CLUSTER_ID}
+    region: ${CAMUNDA_REGION}
+    zeebe:
+      defaults:
+        stream-enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    env:
+      show-values: always
+    threaddump:
+      enabled: true
+    heapdump:
+      enabled: true
+  metrics:
+    export:
+      simple:
+        enabled: true
+
+# Custom Info for Actuator /info endpoint
+info:
+  app:
+    name: My Job Worker
+    description: A job worker for processing tasks
+    version: 1.0.0
+    build:
+      timestamp: ${maven.build.timestamp}
