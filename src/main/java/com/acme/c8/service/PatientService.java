@@ -25,6 +25,8 @@ public class PatientService {
         return outputs;
     }
 
+    
+
     public long evaluatePatients(int pageIndex) throws Exception {
         List<Map<String, Object>> patientList = patientClient.loadPatients(pageIndex, 1000);
         return DmnEvaluator.go(patientList);
